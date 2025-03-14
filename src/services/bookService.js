@@ -23,5 +23,6 @@ export const updateBook = async (book) => {
 
 export const deleteBook = async (id) => {
   const url = `${API_URL}/books/${id}`;
-  await axios.delete(url);
+  const response = await axios.delete(url);
+  return response;
 };

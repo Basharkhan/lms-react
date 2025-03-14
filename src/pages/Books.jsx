@@ -1,127 +1,101 @@
-import React, { useState, useEffect } from "react";
-import BookModal from "../components/BookModal";
-import {
-  getBooks,
-  addBook,
-  updateBook,
-  deleteBook,
-} from "../services/bookService";
+import React, { useEffect, useState } from "react";
+import { addBook, deleteBook, getBooks } from "../services/bookService";
+import { MdOutlineDeleteOutline } from "react-icons/md";
+import { CiEdit } from "react-icons/ci";
 
 const Books = () => {
   const [books, setBooks] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBook, setSelectedBook] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      const response = await getBooks();
+    const fetchData = async () => {
+      try {
+        const response = await getBooks();
+        console.log(response.data.data);
 
-      setBooks(response.data.data);
+        setBooks(response.data.data);
+        setLoading(false);
+      } catch (error) {
+        console.log("Error fetching books", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchBooks();
+
+    fetchData();
   }, []);
 
-  const handleAddBook = () => {
-    setSelectedBook(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditBook = (book) => {
-    setSelectedBook(book);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteBook = async (id) => {
-    await deleteBook(id);
-    setBooks(books.filter((book) => book.id !== id));
-  };
-
-  const handleSaveBook = async (book) => {
-    if (book.id) {
-      await updateBook(book);
-      setBooks(books.map((b) => (b.id === book.id ? book : b)));
-    } else {
-      const response = await addBook(book);
-      setBooks([...books, response.data.data]);
+  const handleDelete = async (id) => {
+    try {
+      const response = await deleteBook(id);
+      const updatedBooks = books.filter((book) => book.id !== id);
+      setBooks(updatedBooks);
+    } catch (error) {
+      console.log("Error deleting book", error);
     }
-    setIsModalOpen(false);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="container mx-auto mt-8 p-4 shadow-md border-t-2 border-t-blue-500">
-      <h1 className="text-2xl font-bold mb-6">Book List</h1>
-      <button
-        onClick={handleAddBook}
-        className="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600 mb-4"
-      >
-        + Add New Book
-      </button>
-
-      <div className="overflow-x-auto">
-        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-              <tr>
-                <th scope="col" className="px-6 py-3">
-                  Title
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Author
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Isbn
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Published Date
-                </th>
-                <th scope="col" className="px-6 py-3">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {books.length > 0 ? (
-                books.map((book) => (
-                  <tr
-                    key={book.id}
-                    className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700 border-gray-200"
-                  >
-                    <td className="px-6 py-4">{book.title}</td>
-                    <td className="px-6 py-4">{book.author}</td>
-                    <td className="px-6 py-4">{book.isbn}</td>
-                    <td className="px-6 py-4">{book.published_date}</td>
-                    <td className="flex gap-x-2 px-6 py-4">
-                      <button
-                        onClick={() => handleEditBook(book)}
-                        className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600 mr-2"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBook(book.id)}
-                        className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800">
-                  <td className="px-6 py-4">No recored found!</td>
+    <div className="container mx-auto px-4">
+      <div className="relative overflow-x-auto mt-12">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Title
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Author
+              </th>
+              <th scope="col" className="px-6 py-3">
+                ISBN
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Published Date
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {books.length > 0 ? (
+              books.map((book) => (
+                <tr
+                  key={book.id}
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
+                >
+                  <td className="px-6 py-4">{book.title}</td>
+                  <td className="px-6 py-4">{book.author}</td>
+                  <td className="px-6 py-4">{book.isbn}</td>
+                  <td className="px-6 py-4">{book.published_date}</td>
+                  <td className="flex gap-x-2 px-6 py-4">
+                    <CiEdit
+                      size={20}
+                      className="cursor-pointer text-blue-500 hover:text-blue-700"
+                    />
+                    <MdOutlineDeleteOutline
+                      size={20}
+                      onClick={() => handleDelete(book.id)}
+                      className="cursor-pointer text-red-500 hover:text-red-700"
+                    />
+                  </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center py-4">
+                  No record found!
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-
-      <BookModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveBook}
-        book={selectedBook}
-      />
     </div>
   );
 };
