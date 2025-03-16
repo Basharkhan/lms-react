@@ -15,8 +15,6 @@ export const addBook = async (book) => {
 };
 
 export const updateBook = async (book) => {
-  console.log(book);
-
   const url = `${API_URL}/books/${book.id}`;
   await axios.put(url, book);
 };

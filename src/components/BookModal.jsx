@@ -1,11 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MdCancel } from "react-icons/md";
 
-const BookModal = ({ isOpen, onClose, onSave }) => {
-  if (!isOpen) {
-    return null;
-  }
-
+const BookModal = ({ isOpen, onClose, onSave, book }) => {
   const [formData, setFormData] = React.useState({
     title: "",
     author: "",
@@ -13,16 +9,39 @@ const BookModal = ({ isOpen, onClose, onSave }) => {
     published_date: "",
   });
 
+  useEffect(() => {
+    if (book) setFormData(book);
+    else
+      setFormData({
+        title: "",
+        author: "",
+        isbn: "",
+        published_date: "",
+      });
+  }, [book]);
+
+  if (!isOpen) {
+    return null;
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
+    setFormData({
+      title: "",
+      author: "",
+      isbn: "",
+      published_date: "",
+    });
   };
 
   return (
     <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white w-1/2 rounded-lg">
         <div className="flex justify-between items-center px-8 py-4 border-b">
-          <h3 className="text-md font-bold text-gray-900">Add Book</h3>
+          <h3 className="text-md font-bold text-gray-900">
+            {book ? "Edit Book" : "Add Book"}
+          </h3>
           <MdCancel
             size={20}
             className="text-red-500 cursor-pointer"
@@ -106,7 +125,7 @@ const BookModal = ({ isOpen, onClose, onSave }) => {
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-10 py-2 rounded cursor-pointer hover:bg-blue-600"
           >
-            Add
+            {book ? "Update" : "Add"}
           </button>
         </div>
       </div>

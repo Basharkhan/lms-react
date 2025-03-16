@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { addBook, deleteBook, getBooks } from "../services/bookService";
+import {
+  addBook,
+  deleteBook,
+  getBooks,
+  updateBook,
+} from "../services/bookService";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { CiEdit } from "react-icons/ci";
 import BookModal from "../components/BookModal";
@@ -8,6 +13,7 @@ const Books = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalIsOpen, setIsModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +37,7 @@ const Books = () => {
     try {
       if (book.id) {
         await updateBook(book);
-        setBooks(books.map((b) => b.id != book.id));
+        setBooks(books.map((b) => (b.id === book.id ? book : b)));
       } else {
         const response = await addBook(book);
         setBooks([...books, response.data.data]);
@@ -39,6 +45,15 @@ const Books = () => {
       setIsModalOpen(false);
     } catch (error) {
       console.log("Error adding book", error);
+    }
+  };
+
+  const handleEdit = async (book) => {
+    try {
+      setSelectedBook(book);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.log("Error editing book", error);
     }
   };
 
@@ -54,6 +69,7 @@ const Books = () => {
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
+    setSelectedBook(null);
   };
 
   const handleModalClose = () => {
@@ -107,6 +123,7 @@ const Books = () => {
                   <td className="flex gap-x-2 px-6 py-4">
                     <CiEdit
                       size={20}
+                      onClick={() => handleEdit(book)}
                       className="cursor-pointer text-blue-500 hover:text-blue-700"
                     />
                     <MdOutlineDeleteOutline
@@ -132,6 +149,7 @@ const Books = () => {
         isOpen={modalIsOpen}
         onClose={handleModalClose}
         onSave={handleSaveBook}
+        book={selectedBook}
       />
     </div>
   );
