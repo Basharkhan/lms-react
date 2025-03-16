@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { addBook, deleteBook, getBooks } from "../services/bookService";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { CiEdit } from "react-icons/ci";
+import BookModal from "../components/BookModal";
 
 const Books = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalIsOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,13 +37,27 @@ const Books = () => {
     }
   };
 
+  const handleOpenModal = async () => {
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="container mx-auto px-4">
-      <div className="relative overflow-x-auto mt-12">
+      <div className="relative overflow-x-auto mt-12 shadow-lg rounded-lg p-4">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-6 py-2 rounded-lg bg-blue-500 text-white mb-4 cursor-pointer"
+        >
+          Add Book
+        </button>
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -96,6 +112,8 @@ const Books = () => {
           </tbody>
         </table>
       </div>
+
+      <BookModal isOpen={modalIsOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };
