@@ -27,6 +27,21 @@ const Books = () => {
     fetchData();
   }, []);
 
+  const handleSaveBook = async (book) => {
+    try {
+      if (book.id) {
+        await updateBook(book);
+        setBooks(books.map((b) => b.id != book.id));
+      } else {
+        const response = await addBook(book);
+        setBooks([...books, response.data.data]);
+      }
+      setIsModalOpen(false);
+    } catch (error) {
+      console.log("Error adding book", error);
+    }
+  };
+
   const handleDelete = async (id) => {
     try {
       const response = await deleteBook(id);
@@ -37,12 +52,12 @@ const Books = () => {
     }
   };
 
-  const handleOpenModal = async () => {
-    setIsOpen(true);
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsOpen(false);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -51,15 +66,15 @@ const Books = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <div className="relative overflow-x-auto mt-12 shadow-lg rounded-lg p-4">
+      <div className="relative overflow-x-auto mt-12 shadow-lg rounded-lg p-4 border-t-2 border-t-blue-500">
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleModalOpen}
           className="px-6 py-2 rounded-lg bg-blue-500 text-white mb-4 cursor-pointer"
         >
           Add Book
         </button>
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
                 Title
@@ -113,7 +128,11 @@ const Books = () => {
         </table>
       </div>
 
-      <BookModal isOpen={modalIsOpen} onClose={() => setIsModalOpen(false)} />
+      <BookModal
+        isOpen={modalIsOpen}
+        onClose={handleModalClose}
+        onSave={handleSaveBook}
+      />
     </div>
   );
 };
